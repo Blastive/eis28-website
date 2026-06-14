@@ -1,19 +1,52 @@
 backend:
   name: github
   repo: Blastive/eis28-website
-  branch: main 
+  branch: main
 
-media_folder: "images" # Saves new pictures into an images folder
+media_folder: "images"
 public_folder: "images"
 
 collections:
   - name: "galleries"
     label: "Photo Galleries"
-    folder: "galleries" # This is where it will save the event data
-    create: true
-    fields:
-      - {label: "Event Name", name: "title", widget: "string"}
-      - {label: "Date (e.g. Spring 2027)", name: "date", widget: "string"}
-      - {label: "Volume Number", name: "volume", widget: "string"}
-      - {label: "Event Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
-      
+    files:
+      - name: "eis-games"
+        label: "EIS Games"
+        file: "galleries/eis-games.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      - name: "fun-fair"
+        label: "Fun Fair"
+        file: "galleries/fun-fair.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      - name: "junior-love-day"
+        label: "Junior Love Day"
+        file: "galleries/junior-love-day.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      - name: "prom"
+        label: "Prom '27"
+        file: "galleries/prom.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      - name: "bible-camp"
+        label: "Bible Camp"
+        file: "galleries/bible-camp.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      - name: "field-trips"
+        label: "Field Trips"
+        file: "galleries/field-trips.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      - name: "junior-film-show"
+        label: "Junior Film Show"
+        file: "galleries/junior-film-show.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      - name: "miscellaneous"
+        label: "Miscellaneous"
+        file: "galleries/miscellaneous.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
