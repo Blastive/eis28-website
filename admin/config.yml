@@ -2,8 +2,6 @@ backend:
   name: github
   repo: Blastive/eis28-website
   branch: main 
-  auth_type: pkce
-  app_id: PASTE_YOUR_CLIENT_ID_HERE
 
 media_folder: "images" # Saves new pictures into an images folder
 public_folder: "images"
