@@ -16,3 +16,4 @@ collections:
       - {label: "Date (e.g. Spring 2027)", name: "date", widget: "string"}
       - {label: "Volume Number", name: "volume", widget: "string"}
       - {label: "Event Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      
