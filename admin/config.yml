@@ -45,6 +45,11 @@ collections:
         file: "galleries/junior-film-show.json"
         fields:
           - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
+      - name: "gb-sale"
+        label: "GB Sale"
+        file: "galleries/gb-sale.json"
+        fields:
+          - {label: "Photos", name: "photos", widget: "list", field: {label: "Photo", name: "image", widget: "image"}}
       - name: "miscellaneous"
         label: "Miscellaneous"
         file: "galleries/miscellaneous.json"
