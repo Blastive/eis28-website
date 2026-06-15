@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EIS '28 — Class of 2028</title>
+  <link rel="icon" type="image/png" href="tiger-done.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
   <style>
@@ -441,10 +442,39 @@
     document.getElementById('sGrid').innerHTML=sponsors.map(([n,r])=>`<div class="oc"><div class="op"><div class="oph">${ps}</div></div><div class="on">${n}</div><div class="or">${r}</div></div>`).join('');
 
     // Gallery
+    const REPO='Blastive/eis28-website';
     const evtFolders=['eis-games','fun-fair','junior-love-day','prom','bible-camp','field-trips','junior-film-show','gb-sale','miscellaneous'];
     const evts=[{n:'EIS Games',d:'December 2026',v:'Archive Volume 1',f:'eis-games'},{n:'Fun Fair',d:'January 2027',v:'Archive Volume 2',f:'fun-fair'},{n:'Junior Love Day',d:'February 2027',v:'Archive Volume 3',f:'junior-love-day'},{n:"Prom '27",d:'April 2027',v:'Archive Volume 4',f:'prom'},{n:'Bible Camp',d:'2026–2027',v:'Archive Volume 5',f:'bible-camp'},{n:'Field Trips',d:'2026–2027',v:'Archive Volume 6',f:'field-trips'},{n:'Junior Film Show',d:'October 2026',v:'Archive Volume 7',f:'junior-film-show'},{n:'GB Sale',d:'2026–2027',v:'Archive Volume 8',f:'gb-sale'},{n:'Miscellaneous',d:'2026–2027',v:'Archive Volume 9',f:'miscellaneous'}];
     const is='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
-    document.getElementById('eBlocks').innerHTML=evts.map(e=>`<div class="eb reveal"><div class="eh"><div><div class="et">${e.n}</div><div class="em">${e.d} / ${e.v}</div></div><a href="javascript:void(0)" class="el" onclick="openGallery('${e.f}','${e.n}')">View Archive</a></div><div class="ep">${[1,2,3,4].map(()=>`<div class="epi"><div class="eph">${is}<span>Photo</span></div></div>`).join('')}</div></div>`).join('');
+    document.getElementById('eBlocks').innerHTML=evts.map(e=>`<div class="eb reveal"><div class="eh"><div><div class="et">${e.n}</div><div class="em">${e.d} / ${e.v}</div></div><a href="javascript:void(0)" class="el" onclick="openGallery('${e.f}','${e.n}')">View Archive</a></div><div class="ep" id="prev-${e.f}">${[1,2,3,4].map(()=>`<div class="epi"><div class="eph">${is}<span>Photo</span></div></div>`).join('')}</div></div>`).join('');
+
+    // Load preview thumbnails for each event on the front page
+    async function loadPreviews(){
+      for(const e of evts){
+        try{
+          const res=await fetch(`https://api.github.com/repos/${REPO}/contents/images/${e.f}`);
+          if(!res.ok) continue;
+          const data=await res.json();
+          const imgs=data.filter(f=>(/\.(jpg|jpeg|png|gif|webp)$/i).test(f.name));
+          if(imgs.length===0) continue;
+          const grid=document.getElementById('prev-'+e.f);
+          if(!grid) continue;
+          const show=imgs.slice(0,4);
+          const remaining=imgs.length-show.length;
+          grid.innerHTML=show.map(f=>`<div class="epi" onclick="openGallery('${e.f}','${e.n}')"><img src="${f.download_url}" alt="${f.name}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`).join('');
+          // Fill remaining slots with placeholder or count
+          if(show.length<4){
+            for(let i=show.length;i<4;i++){
+              grid.innerHTML+=`<div class="epi"><div class="eph">${is}<span>Photo</span></div></div>`;
+            }
+          }
+          if(remaining>0){
+            grid.innerHTML+=`<div class="epi" onclick="openGallery('${e.f}','${e.n}')" style="cursor:pointer"><div class="eph" style="font-size:.85rem;font-weight:600;color:var(--m)">+${remaining} more</div></div>`;
+          }
+        }catch(e){}
+      }
+    }
+    loadPreviews();
 
     // ─── GALLERY OVERLAY ───
     let lbImages=[];let lbIndex=0;
@@ -484,7 +514,6 @@
     window.closeLightbox=function(){document.getElementById('lightbox').classList.remove('open')};
     window.navLB=function(dir){lbIndex=(lbIndex+dir+lbImages.length)%lbImages.length;document.getElementById('lbImg').src=lbImages[lbIndex]};
     document.addEventListener('keydown',e=>{if(!document.getElementById('lightbox').classList.contains('open'))return;if(e.key==='Escape')closeLightbox();if(e.key==='ArrowLeft')navLB(-1);if(e.key==='ArrowRight')navLB(1)});
-    const REPO='Blastive/eis28-website';
 
     // ─── EVENT COUNTDOWNS ───
     const evtData=[
