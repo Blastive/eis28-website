@@ -95,7 +95,8 @@
     .evt-card.passed{opacity:.5}
     .evt-card.passed::after{content:'COMPLETED';position:absolute;top:10px;right:-28px;background:var(--m);color:#fff;font-size:.5rem;font-weight:700;letter-spacing:.1em;padding:.2rem 2rem;transform:rotate(45deg)}
     .evt-card.next{border:2px solid var(--m)}
-    .evt-emoji{font-size:1.6rem;margin-bottom:.4rem}
+    .evt-icon{width:36px;height:36px;margin:0 auto .5rem;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(95,20,49,.08)}
+    .evt-icon svg{width:18px;height:18px;stroke:var(--m);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .evt-name{font-family:'Playfair Display',serif;font-style:italic;font-weight:700;font-size:.95rem;color:var(--m);margin-bottom:.15rem}
     .evt-date{font-size:.6rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#999;margin-bottom:.7rem}
     .evt-countdown{display:flex;gap:.5rem;justify-content:center}
@@ -428,6 +429,7 @@
         document.querySelectorAll('.reveal:not(.vis)').forEach(el=>revObs.observe(el));
         if(page==='home'){const t=document.getElementById('tlTrack');if(t&&!t.classList.contains('anim'))tlObs.observe(t)}
         if(page==='team'){cardObs.observe(document.getElementById('oGrid'));cardObs.observe(document.getElementById('sGrid'))}
+        if(page==='gallery'){preloadAllGalleries()}
       },120);
     };
 
@@ -443,6 +445,17 @@
 
     // Gallery
     const REPO='Blastive/eis28-website';
+    const CDN='https://cdn.jsdelivr.net/gh/Blastive/eis28-website@main';
+    const apiCache={};
+    async function fetchFolder(folder){
+      if(apiCache[folder]) return apiCache[folder];
+      const res=await fetch(`https://api.github.com/repos/${REPO}/contents/images/${folder}`);
+      if(!res.ok) return [];
+      const data=await res.json();
+      const imgs=data.filter(f=>(/\.(jpg|jpeg|png|gif|webp)$/i).test(f.name)).map(f=>({name:f.name,url:`${CDN}/images/${folder}/${f.name}`}));
+      apiCache[folder]=imgs;
+      return imgs;
+    }
     const evtFolders=['eis-games','fun-fair','junior-love-day','prom','bible-camp','field-trips','junior-film-show','gb-sale','miscellaneous'];
     const evts=[{n:'EIS Games',d:'December 2026',v:'Archive Volume 1',f:'eis-games'},{n:'Fun Fair',d:'January 2027',v:'Archive Volume 2',f:'fun-fair'},{n:'Junior Love Day',d:'February 2027',v:'Archive Volume 3',f:'junior-love-day'},{n:"Prom '27",d:'April 2027',v:'Archive Volume 4',f:'prom'},{n:'Bible Camp',d:'2026–2027',v:'Archive Volume 5',f:'bible-camp'},{n:'Field Trips',d:'2026–2027',v:'Archive Volume 6',f:'field-trips'},{n:'Junior Film Show',d:'October 2026',v:'Archive Volume 7',f:'junior-film-show'},{n:'GB Sale',d:'2026–2027',v:'Archive Volume 8',f:'gb-sale'},{n:'Miscellaneous',d:'2026–2027',v:'Archive Volume 9',f:'miscellaneous'}];
     const is='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
@@ -452,16 +465,13 @@
     async function loadPreviews(){
       for(const e of evts){
         try{
-          const res=await fetch(`https://api.github.com/repos/${REPO}/contents/images/${e.f}`);
-          if(!res.ok) continue;
-          const data=await res.json();
-          const imgs=data.filter(f=>(/\.(jpg|jpeg|png|gif|webp)$/i).test(f.name));
+          const imgs=await fetchFolder(e.f);
           if(imgs.length===0) continue;
           const grid=document.getElementById('prev-'+e.f);
           if(!grid) continue;
           const show=imgs.slice(0,3);
           const remaining=imgs.length-3;
-          grid.innerHTML=show.map(f=>`<div class="epi" onclick="openGallery('${e.f}','${e.n}')"><img src="${f.download_url}" alt="${f.name}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`).join('');
+          grid.innerHTML=show.map(f=>`<div class="epi" onclick="openGallery('${e.f}','${e.n}')"><img src="${f.url}" alt="${f.name}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`).join('');
           if(remaining>0){
             grid.innerHTML+=`<div class="epi" onclick="openGallery('${e.f}','${e.n}')" style="cursor:pointer"><div class="eph" style="font-size:.85rem;font-weight:600;color:var(--m)">+${remaining} more</div></div>`;
           }
@@ -469,6 +479,18 @@
       }
     }
     loadPreviews();
+
+    // Preload all gallery images when Gallery tab is visited
+    let preloaded=false;
+    async function preloadAllGalleries(){
+      if(preloaded) return;
+      preloaded=true;
+      for(const e of evts){
+        const imgs=await fetchFolder(e.f);
+        // Preload first 10 images of each category into browser cache
+        imgs.slice(0,10).forEach(f=>{const i=new Image();i.src=f.url});
+      }
+    }
 
     // ─── GALLERY OVERLAY ───
     let lbImages=[];let lbIndex=0;
@@ -483,18 +505,17 @@
       overlay.classList.add('open');
       document.body.style.overflow='hidden';
       try{
-        const res=await fetch(`https://api.github.com/repos/${REPO}/contents/images/${folder}`);
-        if(!res.ok) throw new Error('No photos yet');
-        const data=await res.json();
-        const imgs=data.filter(f=>(/\.(jpg|jpeg|png|gif|webp)$/i).test(f.name));
+        const imgs=await fetchFolder(folder);
         if(imgs.length===0){
           grid.innerHTML='<div class="go-empty"><p>No photos yet</p><span>Upload photos through the admin panel to see them here</span></div>';
           count.textContent='0 photos';
           return;
         }
-        lbImages=imgs.map(f=>f.download_url);
+        lbImages=imgs.map(f=>f.url);
         count.textContent=`${imgs.length} photo${imgs.length>1?'s':''}`;
-        grid.innerHTML=imgs.map((f,i)=>`<div class="go-img" onclick="openLB(${i})"><img src="${f.download_url}" alt="${f.name}" loading="lazy"></div>`).join('');
+        grid.innerHTML=imgs.map((f,i)=>`<div class="go-img" onclick="openLB(${i})"><img src="${f.url}" alt="${f.name}"></div>`).join('');
+        // Preload all images into browser cache
+        imgs.forEach(f=>{const im=new Image();im.src=f.url});
       }catch(e){
         grid.innerHTML='<div class="go-empty"><p>No photos yet</p><span>Upload photos through the admin panel to see them here</span></div>';
         count.textContent='0 photos';
@@ -510,12 +531,19 @@
     document.addEventListener('keydown',e=>{if(!document.getElementById('lightbox').classList.contains('open'))return;if(e.key==='Escape')closeLightbox();if(e.key==='ArrowLeft')navLB(-1);if(e.key==='ArrowRight')navLB(1)});
 
     // ─── EVENT COUNTDOWNS ───
+    const evtIcons={
+      film:'<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5"/></svg>',
+      trophy:'<svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2Z"/></svg>',
+      ferris:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',
+      heart:'<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>',
+      sparkle:'<svg viewBox="0 0 24 24"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>'
+    };
     const evtData=[
-      {name:'Junior Film Show',emoji:'🎬',date:'2026-10-26T09:00:00+07:00',display:'October 26, 2026'},
-      {name:'EIS Games',emoji:'🏆',date:'2026-12-08T08:00:00+07:00',display:'December 8–9, 2026'},
-      {name:'Fun Fair',emoji:'🎡',date:'2027-01-10T09:00:00+07:00',display:'January 10, 2027'},
-      {name:'Junior Love Day',emoji:'💕',date:'2027-02-12T09:00:00+07:00',display:'February 12, 2027'},
-      {name:"Prom '27",emoji:'✨',date:'2027-04-24T18:00:00+07:00',display:'April 24, 2027'},
+      {name:'Junior Film Show',icon:evtIcons.film,date:'2026-10-26T09:00:00+07:00',display:'October 26, 2026'},
+      {name:'EIS Games',icon:evtIcons.trophy,date:'2026-12-08T08:00:00+07:00',display:'December 8–9, 2026'},
+      {name:'Fun Fair',icon:evtIcons.ferris,date:'2027-01-10T09:00:00+07:00',display:'January 10, 2027'},
+      {name:'Junior Love Day',icon:evtIcons.heart,date:'2027-02-12T09:00:00+07:00',display:'February 12, 2027'},
+      {name:"Prom '27",icon:evtIcons.sparkle,date:'2027-04-24T18:00:00+07:00',display:'April 24, 2027'},
     ];
     const evtGrid=document.getElementById('evtGrid');
     function renderEvents(){
@@ -527,7 +555,7 @@
         if(passed){cd='<div class="evt-passed-text">Event Completed</div>'}
         else{const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);
           cd=`<div class="evt-countdown"><div class="evt-cd-item"><div class="evt-cd-num" data-evt="${i}" data-unit="d">${d}</div><div class="evt-cd-unit">Days</div></div><div class="evt-cd-item"><div class="evt-cd-num" data-evt="${i}" data-unit="h">${String(h).padStart(2,'0')}</div><div class="evt-cd-unit">Hrs</div></div><div class="evt-cd-item"><div class="evt-cd-num" data-evt="${i}" data-unit="m">${String(m).padStart(2,'0')}</div><div class="evt-cd-unit">Min</div></div><div class="evt-cd-item"><div class="evt-cd-num" data-evt="${i}" data-unit="s">${String(s).padStart(2,'0')}</div><div class="evt-cd-unit">Sec</div></div></div>`}
-        return `<div class="evt-card${passed?' passed':''}${isNext?' next':''}"><div class="evt-emoji">${ev.emoji}</div><div class="evt-name">${ev.name}</div><div class="evt-date">${ev.display}</div>${cd}</div>`
+        return `<div class="evt-card${passed?' passed':''}${isNext?' next':''}"><div class="evt-icon">${ev.icon}</div><div class="evt-name">${ev.name}</div><div class="evt-date">${ev.display}</div>${cd}</div>`
       }).join('');
     }
     function tickEvents(){const now=new Date();evtData.forEach((ev,i)=>{const diff=new Date(ev.date)-now;if(diff<=0)return;const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);const set=(u,v)=>{const el=document.querySelector(`[data-evt="${i}"][data-unit="${u}"]`);if(el)el.textContent=v};set('d',d);set('h',String(h).padStart(2,'0'));set('m',String(m).padStart(2,'0'));set('s',String(s).padStart(2,'0'))})}
