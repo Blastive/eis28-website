@@ -340,7 +340,10 @@
 
   <!-- ══════════ GALLERY ══════════ -->
   <div class="page" id="page-gallery">
-    <div class="pg-banner"><div class="pbe">EIS '28</div><h1>Gallery</h1><p>Event Archives · Junior Year 2026–2027</p></div>
+    <div class="pg-banner" style="position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:url('gallery-bg.png') center/cover no-repeat;opacity:.15;pointer-events:none"></div>
+      <div style="position:relative;z-index:2"><div class="pbe">EIS '28</div><h1>Gallery</h1><p>Event Archives · Junior Year 2026–2027</p></div>
+    </div>
     <section class="std" style="background:var(--cl)"><div class="wrap">
       <div class="sh reveal"><h2>Photo Archive</h2><span class="sh-m">All Events</span></div>
       <div id="eBlocks"></div>
