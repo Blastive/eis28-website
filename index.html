@@ -671,4 +671,11 @@
     const revObs=new IntersectionObserver(en=>en.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')}),{threshold:.08});
     document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
     const cardObs=new IntersectionObserver(en=>en.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.oc').forEach((c,i)=>setTimeout(()=>c.classList.add('vis'),i*40));cardObs.unobserve(e.target)}}),{threshold:.08});
-    const tlObs=new IntersectionObserver(en=>en.forEach(e=>{if(e.isIntersecting){e.target.classList.add('anim');e.target.querySelectorAll('.ti').forEach((it,i)=>setTimeout(()=>it.classList.add('vis'),300+i*200));tlObs.unobserve(e.tar
+    const tlObs=new IntersectionObserver(en=>en.forEach(e=>{if(e.isIntersecting){e.target.classList.add('anim');e.target.querySelectorAll('.ti').forEach((it,i)=>setTimeout(()=>it.classList.add('vis'),300+i*200));tlObs.unobserve(e.target)}}),{threshold:.12});
+    tlObs.observe(document.getElementById('tlTrack'));
+
+    window.handleNotify=function(){const i=document.querySelector('.nf input');if(!i.value.trim()||!i.value.includes('@')){alert('Please enter a valid email.');return}alert("Thanks! We'll notify you when the shop launches.");i.value=''};
+  })();
+  </script>
+</body>
+</html>
