@@ -438,7 +438,18 @@
     .heritage-btn::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.2);transform:translate(-50%,-50%);transition:width .6s,height .6s}
     .heritage-btn:hover::before{width:300px;height:300px}
 
-    </style>
+    
+
+    /* ANNOUNCEMENTS */
+    .ann{background:var(--white);padding:5rem 0 3rem}
+    .ann-list{display:grid;gap:1rem}
+    .ann-card{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;background:var(--cl);border:1px solid var(--border);border-left:4px solid var(--m);border-radius:8px;padding:1.5rem 1.75rem;transition:transform .4s,box-shadow .4s}
+    .ann-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.06)}
+    .ann-tag{font-family:'Montserrat',sans-serif;font-size:.55rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--m);opacity:.55;margin-bottom:.35rem}
+    .ann-title{font-family:'Playpen Sans',cursive;font-size:1.25rem;font-weight:700;color:var(--m);margin-bottom:.35rem}
+    .ann-text{font-family:'Montserrat',sans-serif;font-size:.85rem;line-height:1.6;color:var(--ch);opacity:.75;max-width:620px;margin:0}
+    @media(max-width:576px){.ann{padding:3.5rem 0 2rem}.ann-card{padding:1.25rem}.ann-btn{width:100%;text-align:center}}
+  </style>
 </head>
 <body>
 
@@ -467,6 +478,21 @@
       <a href="javascript:void(0)" class="sa" onclick="document.getElementById('about-anchor').scrollIntoView({behavior:'smooth'})">&#8595;</a>
     </section>
     <div id="about-anchor"></div>
+
+    <!-- ANNOUNCEMENTS -->
+    <section class="ann" id="announcements"><div class="wrap">
+      <div class="sh reveal"><h2>Announcements</h2><span class="sh-m">Latest Updates</span></div>
+      <div class="ann-list reveal">
+        <div class="ann-card">
+          <div>
+            <div class="ann-tag">Prom &bull; April 24, 2027</div>
+            <h3 class="ann-title">Vote for the Prom Theme</h3>
+            <p class="ann-text">Prom is on April 24, 2027 and the seniors get to pick the theme. Choose your favorite in the form, or write in your own idea.</p>
+          </div>
+          <a class="heritage-btn ann-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdPAPyVd9UOZcVtmfq6t2cnG6AafT51lcYbY-boWuhR-JOYLw/viewform?usp=sharing&amp;ouid=107429691674684603502" target="_blank" rel="noopener noreferrer">Vote Now</a>
+        </div>
+      </div>
+    </div></section>
 
     <!-- TIGER -->
     <section class="editorial" style="background:var(--white)"><div class="wrap">
